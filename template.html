@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IT Pulse — Daily Tech News</title>
+  <meta name="description" content="Aggregated daily IT and technology news from top sources, updated every 24 hours." />
+
+  <!-- Google Fonts: Inter for body, JetBrains Mono for meta/code labels -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════════
+       RESET & CSS CUSTOM PROPERTIES
+       Eye-friendly light palette:
+         • Soft off-white background  (#f5f4f0) — warmer than pure white
+         • Dark-gray text (#2c2c2e) — high contrast without harsh black
+         • Muted secondary text (#6e6e73)
+         • Teal accent (#0a7ea4) — calm, readable, not neon
+         • Warm card surface (#ffffff) with subtle border (#e2e0da)
+    ═══════════════════════════════════════════════════════════════ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      /* ── Backgrounds ── */
+      --bg:           #f5f4f0;   /* warm off-white page background          */
+      --surface:      #ffffff;   /* card / panel background                 */
+      --surface-alt:  #faf9f6;   /* slightly tinted surface (featured card) */
+      --header-bg:    #ffffff;   /* header background                       */
+
+      /* ── Borders ── */
+      --border:       #e2e0da;   /* subtle warm-gray border                 */
+      --border-focus: #0a7ea4;   /* accent color for focus rings            */
+
+      /* ── Text ── */
+      --text:         #2c2c2e;   /* primary text — dark charcoal            */
+      --text-secondary: #4a4a4f; /* slightly lighter body text              */
+      --muted:        #6e6e73;   /* timestamps, labels, secondary info      */
+      --muted-light:  #9a9a9f;   /* very subtle text (card index numbers)   */
+
+      /* ── Accent ── */
+      --accent:       #0a7ea4;   /* teal — links, badges, highlights        */
+      --accent-hover: #085f7a;   /* darker teal on hover                    */
+      --accent-bg:    #e8f4f8;   /* very light teal tint for badge bg       */
+      --accent-line:  #0a7ea4;   /* header underline / progress bar         */
+
+      /* ── Status dot ── */
+      --dot-color:    #34c759;   /* green "live" indicator                  */
+
+      /* ── Typography ── */
+      --font-body:    'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+
+      /* ── Layout ── */
+      --radius:       8px;
+      --radius-sm:    4px;
+      --gutter:       clamp(16px, 4vw, 40px);
+      --max-width:    1100px;
+
+      /* ── Shadows ── */
+      --shadow-card:  0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-hover: 0 4px 12px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
+    }
+
+    /* ── Base ─────────────────────────────────────────────────────── */
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-weight: 400;
+      line-height: 1.65;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ── Scroll Progress Bar ──────────────────────────────────────── */
+    .progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 3px;
+      background: var(--accent-line);
+      z-index: 1000;
+      transition: width 0.1s linear;
+      border-radius: 0 2px 2px 0;
+    }
+
+    /* ── Skip Link (accessibility) ────────────────────────────────── */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--accent);
+      color: #fff;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      border-radius: 0 0 var(--radius-sm) 0;
+      z-index: 9999;
+      transition: top 0.2s;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       HEADER
+    ═══════════════════════════════════════════════════════════════ */
+    header {
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--border);
+      padding: calc(var(--gutter) * 1.25) var(--gutter) var(--gutter);
+      position: relative;
+    }
+
+    /* Teal accent line under the header */
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: var(--gutter);
+      width: 80px;
+      height: 3px;
+      background: var(--accent-line);
+      border-radius: 2px 2px 0 0;
+    }
+
+    .header-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    /* Logo group */
+    .logo-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .logo-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: clamp(1.75rem, 5vw, 3rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    h1 .accent {
+      color: var(--accent);
+    }
+
+    /* Header meta (date / update info) */
+    .header-meta {
+      text-align: right;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .header-meta .generated-time {
+      display: block;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 2px;
+    }
+
+    .header-meta .next-update {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       STATS BAR
+    ═══════════════════════════════════════════════════════════════ */
+    .stats-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px var(--gutter);
+    }
+
+    .stats-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .stat-num {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* Animated "live" dot */
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--dot-color);
+      flex-shrink: 0;
+      animation: livePulse 2.4s ease-in-out infinite;
+    }
+
+    @keyframes livePulse {
+      0%, 100% { opacity: 1;   transform: scale(1);   }
+      50%       { opacity: 0.5; transform: scale(0.7); }
+    }
+
+    /* Source chips */
+    .sources-list {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
+
+    .source-chip {
+      background: var(--accent-bg);
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 9px;
+      border-radius: 20px;
+      border: 1px solid rgba(10, 126, 164, 0.2);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       MAIN CONTENT AREA
+    ═══════════════════════════════════════════════════════════════ */
+    main {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: calc(var(--gutter) * 1.25) var(--gutter) calc(var(--gutter) * 2);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       NEWS GRID
+    ═══════════════════════════════════════════════════════════════ */
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr));
+      gap: 16px;
+      animation: fadeUp 0.35s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       NEWS CARD
+    ═══════════════════════════════════════════════════════════════ */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 22px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: var(--shadow-card);
+      transition: box-shadow 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+      position: relative;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-hover);
+      border-color: rgba(10, 126, 164, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* Card index number (top-right corner) */
+    .card-index {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted-light);
+      letter-spacing: 0.04em;
+      user-select: none;
+    }
+
+    /* ── Card Meta Row (badge + date) ── */
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding-right: 36px; /* avoid overlap with card-index */
+    }
+
+    /* Source badge */
+    .badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      background: var(--accent-bg);
+      color: var(--accent);
+      border: 1px solid rgba(10, 126, 164, 0.18);
+      white-space: nowrap;
+    }
+
+    /* Publication date */
+    .card-date {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* ── Card Title ── */
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.4;
+      letter-spacing: -0.01em;
+    }
+
+    .card-title a {
+      color: var(--text);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    .card-title a:hover,
+    .card-title a:focus {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .card-title a:focus {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    /* ── Card Excerpt / Summary ── */
+    .card-excerpt {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      flex: 1;
+    }
+
+    /* Style the "no summary" fallback differently */
+    .card-excerpt.no-summary {
+      color: var(--muted);
+      font-style: italic;
+      font-size: 13px;
+    }
+
+    /* ── Read More Link ── */
+    .card-link {
+      margin-top: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.15s ease, gap 0.15s ease;
+    }
+
+    .card-link:hover,
+    .card-link:focus {
+      color: var(--accent-hover);
+      gap: 7px;
+    }
+
+    .card-link:focus {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    .card-link .arrow {
+      transition: transform 0.15s ease;
+      display: inline-block;
+    }
+
+    .card-link:hover .arrow {
+      transform: translateX(3px);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       EMPTY STATE
+    ═══════════════════════════════════════════════════════════════ */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+    }
+
+    .empty-state .empty-icon {
+      font-size: 52px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .empty-state p {
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════════════════════════ */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: calc(var(--gutter) * 0.9) var(--gutter);
+    }
+
+    .footer-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-brand {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .footer-brand .accent {
+      color: var(--accent);
+    }
+
+    .footer-note {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       RESPONSIVE TWEAKS
+    ═══════════════════════════════════════════════════════════════ */
+    @media (max-width: 480px) {
+      .sources-list { display: none; } /* hide chips on very small screens */
+      .header-meta  { text-align: left; }
+      .footer-note  { text-align: left; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       PRINT STYLES
+    ═══════════════════════════════════════════════════════════════ */
+    @media print {
+      .progress, .skip-link, .live-dot { display: none; }
+      body { background: #fff; color: #000; }
+      .card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      .card-link { color: #000; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Scroll progress indicator -->
+<div class="progress" id="progress" role="progressbar" aria-hidden="true"></div>
+
+<!-- Accessibility: skip to main content -->
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════════════════════════ -->
+<header>
+  <div class="header-inner">
+    <div class="logo-group">
+      <span class="logo-tag">// daily feed</span>
+      <h1>IT <span class="accent">Pulse</span></h1>
+    </div>
+
+    <div class="header-meta">
+      <span class="generated-time">{{ generated_at }}</span>
+      Updated every 24 hours · Yangon Time (MMT)<br />
+      <span class="next-update">Next update: {{ next_update }}</span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     STATS BAR
+═══════════════════════════════════════════════════════════════ -->
+<div class="stats-bar" role="complementary" aria-label="Feed statistics">
+  <div class="stats-inner">
+
+    <span class="stat" aria-label="Live feed">
+      <span class="live-dot" aria-hidden="true"></span>
+      <span>LIVE</span>
+    </span>
+
+    <span class="stat">
+      <span class="stat-num">{{ article_count }}</span>&nbsp;articles
+    </span>
+
+    <span class="stat">
+      <span class="stat-num">{{ sources | length }}</span>&nbsp;sources
+    </span>
+
+    <div class="sources-list" aria-label="Active sources">
+      {% for src in sources %}
+      <span class="source-chip">{{ src }}</span>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════════════════════════════ -->
+<main id="main-content">
+
+  {% if articles %}
+  <div class="news-grid" role="feed" aria-label="Latest IT news articles">
+
+    {% for article in articles %}
+
+    {# All articles use the same card style (uniform) #}
+    <article class="card" aria-label="Article {{ loop.index }}">
+      <span class="card-index" aria-hidden="true">{{ "%02d" % loop.index }}</span>
+
+      <div class="card-meta">
+        <span class="badge">{{ article.source }}</span>
+        <time class="card-date" datetime="{{ article.date.strftime('%Y-%m-%d') }}">
+          {{ article.date_str }} · {{ article.time_str }}
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="{{ article.url }}"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="{{ article.title }} (opens in new tab)">
+          {{ article.title }}
+        </a>
+      </div>
+
+      <p class="card-excerpt{% if article.excerpt == 'No summary available — click the link to read the full article.' %} no-summary{% endif %}">
+        {{ article.excerpt }}
+      </p>
+
+      <a class="card-link"
+         href="{{ article.url }}"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: {{ article.title }}">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <!-- Empty state: shown when no articles could be fetched -->
+  <div class="empty-state" role="status">
+    <span class="empty-icon" aria-hidden="true">📡</span>
+    <p>
+      No articles could be fetched right now.<br />
+      The workflow will retry in 24 hours.<br />
+      <small>You can also trigger a manual run from the GitHub Actions tab.</small>
+    </p>
+  </div>
+  {% endif %}
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">IT <span class="accent">Pulse</span></div>
+    <div class="footer-note">
+      Generated by shweba2 · Public RSS feeds only · No tracking · No cookies
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ── Scroll progress bar ──────────────────────────────────────────
+  // Updates the thin teal bar at the top of the page as the user scrolls.
+  (function () {
+    const bar = document.getElementById('progress');
+    if (!bar) return;
+
+    function updateProgress() {
+      const scrolled  = window.scrollY;
+      const maxScroll = document.body.scrollHeight - window.innerHeight;
+      const pct       = maxScroll > 0 ? (scrolled / maxScroll) * 100 : 0;
+      bar.style.width = Math.min(Math.max(pct, 0), 100) + '%';
+    }
+
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress(); // initialise on load
+  }());
+</script>
+
+</body>
+</html>

@@ -1,0 +1,2595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IT Pulse — Daily Tech News</title>
+  <meta name="description" content="Aggregated daily IT and technology news from top sources, updated every 24 hours." />
+
+  <!-- Google Fonts: Inter for body, JetBrains Mono for meta/code labels -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════════
+       RESET & CSS CUSTOM PROPERTIES
+       Eye-friendly light palette:
+         • Soft off-white background  (#f5f4f0) — warmer than pure white
+         • Dark-gray text (#2c2c2e) — high contrast without harsh black
+         • Muted secondary text (#6e6e73)
+         • Teal accent (#0a7ea4) — calm, readable, not neon
+         • Warm card surface (#ffffff) with subtle border (#e2e0da)
+    ═══════════════════════════════════════════════════════════════ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      /* ── Backgrounds ── */
+      --bg:           #f5f4f0;   /* warm off-white page background          */
+      --surface:      #ffffff;   /* card / panel background                 */
+      --surface-alt:  #faf9f6;   /* slightly tinted surface (featured card) */
+      --header-bg:    #ffffff;   /* header background                       */
+
+      /* ── Borders ── */
+      --border:       #e2e0da;   /* subtle warm-gray border                 */
+      --border-focus: #0a7ea4;   /* accent color for focus rings            */
+
+      /* ── Text ── */
+      --text:         #2c2c2e;   /* primary text — dark charcoal            */
+      --text-secondary: #4a4a4f; /* slightly lighter body text              */
+      --muted:        #6e6e73;   /* timestamps, labels, secondary info      */
+      --muted-light:  #9a9a9f;   /* very subtle text (card index numbers)   */
+
+      /* ── Accent ── */
+      --accent:       #0a7ea4;   /* teal — links, badges, highlights        */
+      --accent-hover: #085f7a;   /* darker teal on hover                    */
+      --accent-bg:    #e8f4f8;   /* very light teal tint for badge bg       */
+      --accent-line:  #0a7ea4;   /* header underline / progress bar         */
+
+      /* ── Status dot ── */
+      --dot-color:    #34c759;   /* green "live" indicator                  */
+
+      /* ── Typography ── */
+      --font-body:    'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+
+      /* ── Layout ── */
+      --radius:       8px;
+      --radius-sm:    4px;
+      --gutter:       clamp(16px, 4vw, 40px);
+      --max-width:    1100px;
+
+      /* ── Shadows ── */
+      --shadow-card:  0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-hover: 0 4px 12px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
+    }
+
+    /* ── Base ─────────────────────────────────────────────────────── */
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-weight: 400;
+      line-height: 1.65;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ── Scroll Progress Bar ──────────────────────────────────────── */
+    .progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 3px;
+      background: var(--accent-line);
+      z-index: 1000;
+      transition: width 0.1s linear;
+      border-radius: 0 2px 2px 0;
+    }
+
+    /* ── Skip Link (accessibility) ────────────────────────────────── */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--accent);
+      color: #fff;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      border-radius: 0 0 var(--radius-sm) 0;
+      z-index: 9999;
+      transition: top 0.2s;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       HEADER
+    ═══════════════════════════════════════════════════════════════ */
+    header {
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--border);
+      padding: calc(var(--gutter) * 1.25) var(--gutter) var(--gutter);
+      position: relative;
+    }
+
+    /* Teal accent line under the header */
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: var(--gutter);
+      width: 80px;
+      height: 3px;
+      background: var(--accent-line);
+      border-radius: 2px 2px 0 0;
+    }
+
+    .header-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    /* Logo group */
+    .logo-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .logo-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: clamp(1.75rem, 5vw, 3rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    h1 .accent {
+      color: var(--accent);
+    }
+
+    /* Header meta (date / update info) */
+    .header-meta {
+      text-align: right;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .header-meta .generated-time {
+      display: block;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 2px;
+    }
+
+    .header-meta .next-update {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       STATS BAR
+    ═══════════════════════════════════════════════════════════════ */
+    .stats-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px var(--gutter);
+    }
+
+    .stats-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .stat-num {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* Animated "live" dot */
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--dot-color);
+      flex-shrink: 0;
+      animation: livePulse 2.4s ease-in-out infinite;
+    }
+
+    @keyframes livePulse {
+      0%, 100% { opacity: 1;   transform: scale(1);   }
+      50%       { opacity: 0.5; transform: scale(0.7); }
+    }
+
+    /* Source chips */
+    .sources-list {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
+
+    .source-chip {
+      background: var(--accent-bg);
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 9px;
+      border-radius: 20px;
+      border: 1px solid rgba(10, 126, 164, 0.2);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       MAIN CONTENT AREA
+    ═══════════════════════════════════════════════════════════════ */
+    main {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: calc(var(--gutter) * 1.25) var(--gutter) calc(var(--gutter) * 2);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       NEWS GRID
+    ═══════════════════════════════════════════════════════════════ */
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr));
+      gap: 16px;
+      animation: fadeUp 0.35s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       NEWS CARD
+    ═══════════════════════════════════════════════════════════════ */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 22px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: var(--shadow-card);
+      transition: box-shadow 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+      position: relative;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-hover);
+      border-color: rgba(10, 126, 164, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* Card index number (top-right corner) */
+    .card-index {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted-light);
+      letter-spacing: 0.04em;
+      user-select: none;
+    }
+
+    /* ── Card Meta Row (badge + date) ── */
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding-right: 36px; /* avoid overlap with card-index */
+    }
+
+    /* Source badge */
+    .badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      background: var(--accent-bg);
+      color: var(--accent);
+      border: 1px solid rgba(10, 126, 164, 0.18);
+      white-space: nowrap;
+    }
+
+    /* Publication date */
+    .card-date {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* ── Card Title ── */
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.4;
+      letter-spacing: -0.01em;
+    }
+
+    .card-title a {
+      color: var(--text);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    .card-title a:hover,
+    .card-title a:focus {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .card-title a:focus {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    /* ── Card Excerpt / Summary ── */
+    .card-excerpt {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      flex: 1;
+    }
+
+    /* Style the "no summary" fallback differently */
+    .card-excerpt.no-summary {
+      color: var(--muted);
+      font-style: italic;
+      font-size: 13px;
+    }
+
+    /* ── Read More Link ── */
+    .card-link {
+      margin-top: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.15s ease, gap 0.15s ease;
+    }
+
+    .card-link:hover,
+    .card-link:focus {
+      color: var(--accent-hover);
+      gap: 7px;
+    }
+
+    .card-link:focus {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    .card-link .arrow {
+      transition: transform 0.15s ease;
+      display: inline-block;
+    }
+
+    .card-link:hover .arrow {
+      transform: translateX(3px);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       EMPTY STATE
+    ═══════════════════════════════════════════════════════════════ */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--muted);
+    }
+
+    .empty-state .empty-icon {
+      font-size: 52px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .empty-state p {
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════════════════════════ */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: calc(var(--gutter) * 0.9) var(--gutter);
+    }
+
+    .footer-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-brand {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .footer-brand .accent {
+      color: var(--accent);
+    }
+
+    .footer-note {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       RESPONSIVE TWEAKS
+    ═══════════════════════════════════════════════════════════════ */
+    @media (max-width: 480px) {
+      .sources-list { display: none; } /* hide chips on very small screens */
+      .header-meta  { text-align: left; }
+      .footer-note  { text-align: left; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       PRINT STYLES
+    ═══════════════════════════════════════════════════════════════ */
+    @media print {
+      .progress, .skip-link, .live-dot { display: none; }
+      body { background: #fff; color: #000; }
+      .card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      .card-link { color: #000; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Scroll progress indicator -->
+<div class="progress" id="progress" role="progressbar" aria-hidden="true"></div>
+
+<!-- Accessibility: skip to main content -->
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════════════════════════ -->
+<header>
+  <div class="header-inner">
+    <div class="logo-group">
+      <span class="logo-tag">// daily feed</span>
+      <h1>IT <span class="accent">Pulse</span></h1>
+    </div>
+
+    <div class="header-meta">
+      <span class="generated-time">Friday, March 06, 2026 at 19:25 MMT</span>
+      Updated every 24 hours · Yangon Time (MMT)<br />
+      <span class="next-update">Next update: Saturday, March 07, 2026 at 19:25 MMT</span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     STATS BAR
+═══════════════════════════════════════════════════════════════ -->
+<div class="stats-bar" role="complementary" aria-label="Feed statistics">
+  <div class="stats-inner">
+
+    <span class="stat" aria-label="Live feed">
+      <span class="live-dot" aria-hidden="true"></span>
+      <span>LIVE</span>
+    </span>
+
+    <span class="stat">
+      <span class="stat-num">60</span>&nbsp;articles
+    </span>
+
+    <span class="stat">
+      <span class="stat-num">6</span>&nbsp;sources
+    </span>
+
+    <div class="sources-list" aria-label="Active sources">
+      <span class="source-chip">Hacker News</span>
+      <span class="source-chip">TechCrunch</span>
+      <span class="source-chip">Ars Technica</span>
+      <span class="source-chip">The Verge</span>
+      <span class="source-chip">r/technology</span>
+      <span class="source-chip">r/programming</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════════════════════════════ -->
+<main id="main-content">
+
+  <div class="news-grid" role="feed" aria-label="Latest IT news articles">
+
+
+    <article class="card" aria-label="Article 1">
+      <span class="card-index" aria-hidden="true">01</span>
+
+      <div class="card-meta">
+        <span class="badge">Ars Technica</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 18:50 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://arstechnica.com/tech-policy/2026/03/tech-industry-is-in-tariff-hell-even-if-refunds-are-automated/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Tech industry is in tariff hell, even if refunds are automated (opens in new tab)">
+          Tech industry is in tariff hell, even if refunds are automated
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        Trade groups urge court to create a simple blueprint for tariff refunds.
+      </p>
+
+      <a class="card-link"
+         href="https://arstechnica.com/tech-policy/2026/03/tech-industry-is-in-tariff-hell-even-if-refunds-are-automated/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Tech industry is in tariff hell, even if refunds are automated">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+
+    <article class="card" aria-label="Article 2">
+      <span class="card-index" aria-hidden="true">02</span>
+
+      <div class="card-meta">
+        <span class="badge">Hacker News</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 18:40 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://en.wikipedia.org/wiki/Elite_overproduction"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Elite Overproduction (opens in new tab)">
+          Elite Overproduction
+        </a>
+      </div>
+
+      <p class="card-excerpt no-summary">
+        No summary available — click the link to read the full article.
+      </p>
+
+      <a class="card-link"
+         href="https://en.wikipedia.org/wiki/Elite_overproduction"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Elite Overproduction">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 3">
+      <span class="card-index" aria-hidden="true">03</span>
+
+      <div class="card-meta">
+        <span class="badge">Ars Technica</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 18:40 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://arstechnica.com/tech-policy/2026/03/ai-startup-sues-ex-ceo-saying-he-took-41gb-of-email-and-lied-on-resume/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="AI startup sues ex-CEO, saying he took 41GB of email and lied on résumé (opens in new tab)">
+          AI startup sues ex-CEO, saying he took 41GB of email and lied on résumé
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        Hayden AI also claims co-founder improperly sold over $1.2M in stock.
+      </p>
+
+      <a class="card-link"
+         href="https://arstechnica.com/tech-policy/2026/03/ai-startup-sues-ex-ceo-saying-he-took-41gb-of-email-and-lied-on-resume/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: AI startup sues ex-CEO, saying he took 41GB of email and lied on résumé">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 4">
+      <span class="card-index" aria-hidden="true">04</span>
+
+      <div class="card-meta">
+        <span class="badge">Ars Technica</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 18:30 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://arstechnica.com/gaming/2026/03/which-of-these-two-arcades-is-the-world-largest-and-does-it-matter/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Which of these two arcades is the &#34;world largest&#34;—and does it matter? (opens in new tab)">
+          Which of these two arcades is the &#34;world largest&#34;—and does it matter?
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        While semantics count for some, gamers win either way.
+      </p>
+
+      <a class="card-link"
+         href="https://arstechnica.com/gaming/2026/03/which-of-these-two-arcades-is-the-world-largest-and-does-it-matter/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Which of these two arcades is the &#34;world largest&#34;—and does it matter?">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 5">
+      <span class="card-index" aria-hidden="true">05</span>
+
+      <div class="card-meta">
+        <span class="badge">Ars Technica</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 18:30 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://arstechnica.com/space/2026/03/rocket-report-spacex-launch-prices-are-going-up-russia-fixes-broken-launch-pad/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Rocket Report: SpaceX launch prices are going up; Russia fixes broken launch pad (opens in new tab)">
+          Rocket Report: SpaceX launch prices are going up; Russia fixes broken launch pad
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        It looks like United Launch Alliance will build more upper stages for NASA&#39;s SLS rocket.
+      </p>
+
+      <a class="card-link"
+         href="https://arstechnica.com/space/2026/03/rocket-report-spacex-launch-prices-are-going-up-russia-fixes-broken-launch-pad/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Rocket Report: SpaceX launch prices are going up; Russia fixes broken launch pad">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 6">
+      <span class="card-index" aria-hidden="true">06</span>
+
+      <div class="card-meta">
+        <span class="badge">The Verge</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 18:30 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.theverge.com/tech/889756/mwc-2026-unihertz-light-phone-clicks"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Meet your new phone away from phone (opens in new tab)">
+          Meet your new phone away from phone
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        Unihertz&#39;s booth at MWC was a little out of the way, but those who did find it all seemed to want to pick up the Titan Elite 2. Sure, the cosmic orange color attracted attention, and the QWERTY keyboard reminded one showgoer of his old BlackBerry. But once I picked it up, I could see […]
+      </p>
+
+      <a class="card-link"
+         href="https://www.theverge.com/tech/889756/mwc-2026-unihertz-light-phone-clicks"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Meet your new phone away from phone">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 7">
+      <span class="card-index" aria-hidden="true">07</span>
+
+      <div class="card-meta">
+        <span class="badge">r/technology</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 18:27 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/technology/comments/1rmc2iv/indonesia_to_restrict_social_media_access_for/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Indonesia to restrict social media access for children under 16, minister says (opens in new tab)">
+          Indonesia to restrict social media access for children under 16, minister says
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/talkingatoms [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/technology/comments/1rmc2iv/indonesia_to_restrict_social_media_access_for/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Indonesia to restrict social media access for children under 16, minister says">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 8">
+      <span class="card-index" aria-hidden="true">08</span>
+
+      <div class="card-meta">
+        <span class="badge">Hacker News</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 18:23 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://blog.mozilla.org/en/firefox/hardening-firefox-anthropic-red-team/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Hardening Firefox with Anthropic&#39;s Red Team (opens in new tab)">
+          Hardening Firefox with Anthropic&#39;s Red Team
+        </a>
+      </div>
+
+      <p class="card-excerpt no-summary">
+        No summary available — click the link to read the full article.
+      </p>
+
+      <a class="card-link"
+         href="https://blog.mozilla.org/en/firefox/hardening-firefox-anthropic-red-team/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Hardening Firefox with Anthropic&#39;s Red Team">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 9">
+      <span class="card-index" aria-hidden="true">09</span>
+
+      <div class="card-meta">
+        <span class="badge">Hacker News</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 18:22 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://willhbr.net/2026/03/02/async-inject-and-effects/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Async Programming Is Just Inject Time (opens in new tab)">
+          Async Programming Is Just Inject Time
+        </a>
+      </div>
+
+      <p class="card-excerpt no-summary">
+        No summary available — click the link to read the full article.
+      </p>
+
+      <a class="card-link"
+         href="https://willhbr.net/2026/03/02/async-inject-and-effects/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Async Programming Is Just Inject Time">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 10">
+      <span class="card-index" aria-hidden="true">10</span>
+
+      <div class="card-meta">
+        <span class="badge">r/technology</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 18:08 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/technology/comments/1rmboyq/google_makes_gmail_drive_and_docs_agentready_for/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Google makes Gmail, Drive, and Docs ‘agent-ready’ for OpenClaw (opens in new tab)">
+          Google makes Gmail, Drive, and Docs ‘agent-ready’ for OpenClaw
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/Quantum-Coconut [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/technology/comments/1rmboyq/google_makes_gmail_drive_and_docs_agentready_for/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Google makes Gmail, Drive, and Docs ‘agent-ready’ for OpenClaw">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 11">
+      <span class="card-index" aria-hidden="true">11</span>
+
+      <div class="card-meta">
+        <span class="badge">r/technology</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 17:03 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/technology/comments/1rmajkj/indonesia_bans_social_media_for_under16s/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Indonesia Bans Social Media for Under-16s, Following Australia’s Lead: ‘Parents No Longer Have to Fight Alone Against the Giants of the Algorithm’ (opens in new tab)">
+          Indonesia Bans Social Media for Under-16s, Following Australia’s Lead: ‘Parents No Longer Have to Fight Alone Against the Giants of the Algorithm’
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/MarvelsGrantMan136 [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/technology/comments/1rmajkj/indonesia_bans_social_media_for_under16s/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Indonesia Bans Social Media for Under-16s, Following Australia’s Lead: ‘Parents No Longer Have to Fight Alone Against the Giants of the Algorithm’">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 12">
+      <span class="card-index" aria-hidden="true">12</span>
+
+      <div class="card-meta">
+        <span class="badge">r/technology</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 16:43 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/technology/comments/1rma72o/sam_altman_admits_openai_cant_control_pentagons/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Sam Altman admits OpenAI can’t control Pentagon’s use of AI | Technology (opens in new tab)">
+          Sam Altman admits OpenAI can’t control Pentagon’s use of AI | Technology
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/Thepunnisherrr [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/technology/comments/1rma72o/sam_altman_admits_openai_cant_control_pentagons/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Sam Altman admits OpenAI can’t control Pentagon’s use of AI | Technology">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 13">
+      <span class="card-index" aria-hidden="true">13</span>
+
+      <div class="card-meta">
+        <span class="badge">Hacker News</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 15:52 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://libresprite.github.io/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="LibreSprite – open-source pixel art editor (opens in new tab)">
+          LibreSprite – open-source pixel art editor
+        </a>
+      </div>
+
+      <p class="card-excerpt no-summary">
+        No summary available — click the link to read the full article.
+      </p>
+
+      <a class="card-link"
+         href="https://libresprite.github.io/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: LibreSprite – open-source pixel art editor">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 14">
+      <span class="card-index" aria-hidden="true">14</span>
+
+      <div class="card-meta">
+        <span class="badge">Hacker News</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 15:11 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://runxiyu.org/comp/gplproxy/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="GPL upgrades via section 14 proxy delegation (opens in new tab)">
+          GPL upgrades via section 14 proxy delegation
+        </a>
+      </div>
+
+      <p class="card-excerpt no-summary">
+        No summary available — click the link to read the full article.
+      </p>
+
+      <a class="card-link"
+         href="https://runxiyu.org/comp/gplproxy/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: GPL upgrades via section 14 proxy delegation">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 15">
+      <span class="card-index" aria-hidden="true">15</span>
+
+      <div class="card-meta">
+        <span class="badge">r/programming</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 13:33 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/programming/comments/1rm73tk/i_will_never_use_ai_to_code_or_write/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="I Will Never Use AI to Code (or write) (opens in new tab)">
+          I Will Never Use AI to Code (or write)
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/Anthony261 [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/programming/comments/1rm73tk/i_will_never_use_ai_to_code_or_write/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: I Will Never Use AI to Code (or write)">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 16">
+      <span class="card-index" aria-hidden="true">16</span>
+
+      <div class="card-meta">
+        <span class="badge">Hacker News</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 13:32 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.ycombinator.com/companies/stardex/jobs/lag1C1P-customer-success-engineer-ai-data-migration"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Stardex (YC S21) is hiring customer success engineers (opens in new tab)">
+          Stardex (YC S21) is hiring customer success engineers
+        </a>
+      </div>
+
+      <p class="card-excerpt no-summary">
+        No summary available — click the link to read the full article.
+      </p>
+
+      <a class="card-link"
+         href="https://www.ycombinator.com/companies/stardex/jobs/lag1C1P-customer-success-engineer-ai-data-migration"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Stardex (YC S21) is hiring customer success engineers">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 17">
+      <span class="card-index" aria-hidden="true">17</span>
+
+      <div class="card-meta">
+        <span class="badge">r/technology</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 12:09 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/technology/comments/1rm5kjd/chinas_most_senior_semiconductor_executives/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="China&#39;s most senior semiconductor executives issued a public call this week for a consolidated national effort to build a domestic alternative to Dutch lithography giant ASML, warning that the country&#39;s chip equipment industry remains too &#34;small, fragmented, and weak&#34; (opens in new tab)">
+          China&#39;s most senior semiconductor executives issued a public call this week for a consolidated national effort to build a domestic alternative to Dutch lithography giant ASML, warning that the country&#39;s chip equipment industry remains too &#34;small, fragmented, and weak&#34;
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/Logical_Welder3467 [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/technology/comments/1rm5kjd/chinas_most_senior_semiconductor_executives/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: China&#39;s most senior semiconductor executives issued a public call this week for a consolidated national effort to build a domestic alternative to Dutch lithography giant ASML, warning that the country&#39;s chip equipment industry remains too &#34;small, fragmented, and weak&#34;">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 18">
+      <span class="card-index" aria-hidden="true">18</span>
+
+      <div class="card-meta">
+        <span class="badge">r/technology</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 12:08 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/technology/comments/1rm5jpw/the_future_is_looking_more_dystopian/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="The future is looking more Dystopian (opens in new tab)">
+          The future is looking more Dystopian
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/Ryanmonroe82 [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/technology/comments/1rm5jpw/the_future_is_looking_more_dystopian/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: The future is looking more Dystopian">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 19">
+      <span class="card-index" aria-hidden="true">19</span>
+
+      <div class="card-meta">
+        <span class="badge">r/technology</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 11:53 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/technology/comments/1rm59l5/okta_ceo_paranoid_as_vibe_coders_stir/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Okta CEO ‘paranoid’ as vibe coders stir SaaS-pocalypse fears (opens in new tab)">
+          Okta CEO ‘paranoid’ as vibe coders stir SaaS-pocalypse fears
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/Logical_Welder3467 [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/technology/comments/1rm59l5/okta_ceo_paranoid_as_vibe_coders_stir/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Okta CEO ‘paranoid’ as vibe coders stir SaaS-pocalypse fears">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 20">
+      <span class="card-index" aria-hidden="true">20</span>
+
+      <div class="card-meta">
+        <span class="badge">Hacker News</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 10:45 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://dev.moment.com/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Show HN: Swarm – Program a colony of 200 ants using a custom assembly language (opens in new tab)">
+          Show HN: Swarm – Program a colony of 200 ants using a custom assembly language
+        </a>
+      </div>
+
+      <p class="card-excerpt no-summary">
+        No summary available — click the link to read the full article.
+      </p>
+
+      <a class="card-link"
+         href="https://dev.moment.com/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Show HN: Swarm – Program a colony of 200 ants using a custom assembly language">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 21">
+      <span class="card-index" aria-hidden="true">21</span>
+
+      <div class="card-meta">
+        <span class="badge">Hacker News</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 10:42 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://blog.system76.com/post/system76-on-age-verification/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="System76 on Age Verification Laws (opens in new tab)">
+          System76 on Age Verification Laws
+        </a>
+      </div>
+
+      <p class="card-excerpt no-summary">
+        No summary available — click the link to read the full article.
+      </p>
+
+      <a class="card-link"
+         href="https://blog.system76.com/post/system76-on-age-verification/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: System76 on Age Verification Laws">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 22">
+      <span class="card-index" aria-hidden="true">22</span>
+
+      <div class="card-meta">
+        <span class="badge">r/technology</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 09:49 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/technology/comments/1rm2riy/netflix_just_bought_an_ai_startup_founded_by_ben/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Netflix just bought an AI startup founded by Ben Affleck (opens in new tab)">
+          Netflix just bought an AI startup founded by Ben Affleck
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/PuroPuri4 [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/technology/comments/1rm2riy/netflix_just_bought_an_ai_startup_founded_by_ben/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Netflix just bought an AI startup founded by Ben Affleck">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 23">
+      <span class="card-index" aria-hidden="true">23</span>
+
+      <div class="card-meta">
+        <span class="badge">r/programming</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 09:45 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/programming/comments/1rm2oem/devenv_20_a_fresh_interface_to_nix/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="devenv 2.0: A Fresh Interface to Nix (opens in new tab)">
+          devenv 2.0: A Fresh Interface to Nix
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/nix-solves-that-2317 [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/programming/comments/1rm2oem/devenv_20_a_fresh_interface_to_nix/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: devenv 2.0: A Fresh Interface to Nix">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 24">
+      <span class="card-index" aria-hidden="true">24</span>
+
+      <div class="card-meta">
+        <span class="badge">r/technology</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 08:15 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/technology/comments/1rm0nva/anthropic_where_things_stand_with_the_department/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Anthropic: Where things stand with the Department of War (opens in new tab)">
+          Anthropic: Where things stand with the Department of War
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/ligretto [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/technology/comments/1rm0nva/anthropic_where_things_stand_with_the_department/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Anthropic: Where things stand with the Department of War">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 25">
+      <span class="card-index" aria-hidden="true">25</span>
+
+      <div class="card-meta">
+        <span class="badge">TechCrunch</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 07:58 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://techcrunch.com/2026/03/05/anthropic-to-challenge-dods-supply-chain-label-in-court/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Anthropic to challenge DOD’s supply-chain label in court (opens in new tab)">
+          Anthropic to challenge DOD’s supply-chain label in court
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        Anthropic CEO Dario Amodei said he plans to challenge the Department of Defense&#39;s designation of the AI firm as a supply-chain risk. He claims most Anthropic customers are unaffected by the label.
+      </p>
+
+      <a class="card-link"
+         href="https://techcrunch.com/2026/03/05/anthropic-to-challenge-dods-supply-chain-label-in-court/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Anthropic to challenge DOD’s supply-chain label in court">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 26">
+      <span class="card-index" aria-hidden="true">26</span>
+
+      <div class="card-meta">
+        <span class="badge">The Verge</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 07:54 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.theverge.com/tech/890215/amazon-is-down-login-prices"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Amazon.com says things are fixed after some issues with logging in and checking out (opens in new tab)">
+          Amazon.com says things are fixed after some issues with logging in and checking out
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        If you were having issues shopping on Amazon or loading your playlists on Amazon Music on Thursday, you weren&#39;t alone. For over three hours today, Downdetector showed a sizable spike in people reporting issues with checkout, search, and logging in. The problem seemed to be affecting both the site…
+      </p>
+
+      <a class="card-link"
+         href="https://www.theverge.com/tech/890215/amazon-is-down-login-prices"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Amazon.com says things are fixed after some issues with logging in and checking out">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 27">
+      <span class="card-index" aria-hidden="true">27</span>
+
+      <div class="card-meta">
+        <span class="badge">r/technology</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 07:54 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/technology/comments/1rm06n1/man_fell_in_love_with_google_gemini_and_it_told/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Man Fell in Love with Google Gemini and It Told Him to Stage a &#39;Mass Casualty Attack&#39; Before He Took His Own Life: Lawsuit (opens in new tab)">
+          Man Fell in Love with Google Gemini and It Told Him to Stage a &#39;Mass Casualty Attack&#39; Before He Took His Own Life: Lawsuit
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/Haunterblademoi [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/technology/comments/1rm06n1/man_fell_in_love_with_google_gemini_and_it_told/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Man Fell in Love with Google Gemini and It Told Him to Stage a &#39;Mass Casualty Attack&#39; Before He Took His Own Life: Lawsuit">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 28">
+      <span class="card-index" aria-hidden="true">28</span>
+
+      <div class="card-meta">
+        <span class="badge">r/programming</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 07:51 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/programming/comments/1rm04o3/how_far_can_duckdb_go_without_a_coud_warehouse/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="How far can DuckDB go without a coud warehouse? (opens in new tab)">
+          How far can DuckDB go without a coud warehouse?
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/TheLostWanderer47 [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/programming/comments/1rm04o3/how_far_can_duckdb_go_without_a_coud_warehouse/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: How far can DuckDB go without a coud warehouse?">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 29">
+      <span class="card-index" aria-hidden="true">29</span>
+
+      <div class="card-meta">
+        <span class="badge">r/technology</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 07:47 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/technology/comments/1rm01ad/first_macbook_neo_benchmarks_are_in_heres_how_it/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="First MacBook Neo Benchmarks Are In: Here&#39;s How It Compares to the M1 MacBook Air (opens in new tab)">
+          First MacBook Neo Benchmarks Are In: Here&#39;s How It Compares to the M1 MacBook Air
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/Stock412 [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/technology/comments/1rm01ad/first_macbook_neo_benchmarks_are_in_heres_how_it/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: First MacBook Neo Benchmarks Are In: Here&#39;s How It Compares to the M1 MacBook Air">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 30">
+      <span class="card-index" aria-hidden="true">30</span>
+
+      <div class="card-meta">
+        <span class="badge">r/technology</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 07:47 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/technology/comments/1rm019r/us_president_gets_data_center_companies_to_pledge/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="U.S President gets data center companies to pledge to pay for power generation | With no enforcement and questionable economics, it may not make a difference. (opens in new tab)">
+          U.S President gets data center companies to pledge to pay for power generation | With no enforcement and questionable economics, it may not make a difference.
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/ControlCAD [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/technology/comments/1rm019r/us_president_gets_data_center_companies_to_pledge/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: U.S President gets data center companies to pledge to pay for power generation | With no enforcement and questionable economics, it may not make a difference.">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 31">
+      <span class="card-index" aria-hidden="true">31</span>
+
+      <div class="card-meta">
+        <span class="badge">r/technology</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 07:45 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/technology/comments/1rlzzst/cluely_ceo_roy_lee_admits_to_publicly_lying_about/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Cluely CEO Roy Lee admits to publicly lying about revenue numbers last year (opens in new tab)">
+          Cluely CEO Roy Lee admits to publicly lying about revenue numbers last year
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/aacool [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/technology/comments/1rlzzst/cluely_ceo_roy_lee_admits_to_publicly_lying_about/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Cluely CEO Roy Lee admits to publicly lying about revenue numbers last year">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 32">
+      <span class="card-index" aria-hidden="true">32</span>
+
+      <div class="card-meta">
+        <span class="badge">The Verge</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 07:38 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.theverge.com/21280354/best-ipad-deals-apple"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="The best iPad deals you can get right now (opens in new tab)">
+          The best iPad deals you can get right now
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        While the best iPad deals usually land during major sale events like Black Friday, many great iPad deals are available outside of those times. The day-to-day discounts come and go like changing winds, so there’s often some amount to be saved, particularly on Apple’s most affordable iPad and the…
+      </p>
+
+      <a class="card-link"
+         href="https://www.theverge.com/21280354/best-ipad-deals-apple"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: The best iPad deals you can get right now">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 33">
+      <span class="card-index" aria-hidden="true">33</span>
+
+      <div class="card-meta">
+        <span class="badge">The Verge</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 07:29 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.theverge.com/gadgets/890047/what-if-your-real-computer-was-a-super-sized-lego-computer-brick"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="What if your real computer was a supersized Lego computer brick? (opens in new tab)">
+          What if your real computer was a supersized Lego computer brick?
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        In 1979 - nearly 50 years ago - Lego jazzed up its very first spaceships with an iconic sloped computer brick that was just painted plastic. In 2022, we introduced you to the engineer who fit an actual tiny computer inside. Now, industrial designer Paul Staal has flipped the script with a working…
+      </p>
+
+      <a class="card-link"
+         href="https://www.theverge.com/gadgets/890047/what-if-your-real-computer-was-a-super-sized-lego-computer-brick"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: What if your real computer was a supersized Lego computer brick?">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 34">
+      <span class="card-index" aria-hidden="true">34</span>
+
+      <div class="card-meta">
+        <span class="badge">Hacker News</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 07:13 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://lockywolf.net/2026-02-19_How-to-install-and-start-using-LineageOS-on-your-phone.d/index.html"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="How to install and start using LineageOS on your phone (opens in new tab)">
+          How to install and start using LineageOS on your phone
+        </a>
+      </div>
+
+      <p class="card-excerpt no-summary">
+        No summary available — click the link to read the full article.
+      </p>
+
+      <a class="card-link"
+         href="https://lockywolf.net/2026-02-19_How-to-install-and-start-using-LineageOS-on-your-phone.d/index.html"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: How to install and start using LineageOS on your phone">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 35">
+      <span class="card-index" aria-hidden="true">35</span>
+
+      <div class="card-meta">
+        <span class="badge">Hacker News</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 07:10 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.anthropic.com/news/where-stand-department-war"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Where things stand with the Department of War (opens in new tab)">
+          Where things stand with the Department of War
+        </a>
+      </div>
+
+      <p class="card-excerpt no-summary">
+        No summary available — click the link to read the full article.
+      </p>
+
+      <a class="card-link"
+         href="https://www.anthropic.com/news/where-stand-department-war"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Where things stand with the Department of War">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 36">
+      <span class="card-index" aria-hidden="true">36</span>
+
+      <div class="card-meta">
+        <span class="badge">r/programming</span>
+        <time class="card-date" datetime="2026-03-06">
+          March 06, 2026 · 07:05 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/programming/comments/1rlz1ly/anybody_know_what_happened_to_the_gnu_site/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Anybody know what happened to the GNU site? (opens in new tab)">
+          Anybody know what happened to the GNU site?
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        Temporarily right now, I caught the GNU site just had a bunch of unicode garbled characters. It fixed itself but I&#39;m just curious if anybody saw that too or could explain what they think happened.   submitted by   /u/JeffTheMasterr [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/programming/comments/1rlz1ly/anybody_know_what_happened_to_the_gnu_site/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Anybody know what happened to the GNU site?">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 37">
+      <span class="card-index" aria-hidden="true">37</span>
+
+      <div class="card-meta">
+        <span class="badge">Ars Technica</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 06:06 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://arstechnica.com/gadgets/2026/03/workers-report-watching-ray-ban-meta-shot-footage-of-people-using-the-bathroom/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Workers report watching Ray-Ban Meta-shot footage of people using the bathroom (opens in new tab)">
+          Workers report watching Ray-Ban Meta-shot footage of people using the bathroom
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        Meta accused of &#34;concealing the facts&#34; about smart glass users&#39; privacy.
+      </p>
+
+      <a class="card-link"
+         href="https://arstechnica.com/gadgets/2026/03/workers-report-watching-ray-ban-meta-shot-footage-of-people-using-the-bathroom/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Workers report watching Ray-Ban Meta-shot footage of people using the bathroom">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 38">
+      <span class="card-index" aria-hidden="true">38</span>
+
+      <div class="card-meta">
+        <span class="badge">r/technology</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 06:01 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/technology/comments/1rlxia9/rfk_jrs_antivaccine_policies_are_unreviewable_doj/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="RFK Jr.’s anti-vaccine policies are &#34;unreviewable,&#34; DOJ lawyer tells judge (opens in new tab)">
+          RFK Jr.’s anti-vaccine policies are &#34;unreviewable,&#34; DOJ lawyer tells judge
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/Shogouki [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/technology/comments/1rlxia9/rfk_jrs_antivaccine_policies_are_unreviewable_doj/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: RFK Jr.’s anti-vaccine policies are &#34;unreviewable,&#34; DOJ lawyer tells judge">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 39">
+      <span class="card-index" aria-hidden="true">39</span>
+
+      <div class="card-meta">
+        <span class="badge">r/technology</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 05:52 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/technology/comments/1rlxac2/proton_mail_helped_fbi_unmask_anonymous_stop_cop/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Proton Mail Helped FBI Unmask Anonymous ‘Stop Cop City’ Protester (opens in new tab)">
+          Proton Mail Helped FBI Unmask Anonymous ‘Stop Cop City’ Protester
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/CackleRooster [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/technology/comments/1rlxac2/proton_mail_helped_fbi_unmask_anonymous_stop_cop/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Proton Mail Helped FBI Unmask Anonymous ‘Stop Cop City’ Protester">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 40">
+      <span class="card-index" aria-hidden="true">40</span>
+
+      <div class="card-meta">
+        <span class="badge">The Verge</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 05:46 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.theverge.com/policy/890367/house-lawmakers-online-safety-bills-kids-act"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Lawmakers just advanced online safety laws that require age verification at the app store (opens in new tab)">
+          Lawmakers just advanced online safety laws that require age verification at the app store
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        A package of child safety bills is headed to the House floor following an hours-long session that left Democrats and Republicans divided. On Thursday, lawmakers on the House Committee on Energy and Commerce voted to advance the Kids Internet and Digital Safety (KIDS) Act; Sammy&#39;s Law; and the App…
+      </p>
+
+      <a class="card-link"
+         href="https://www.theverge.com/policy/890367/house-lawmakers-online-safety-bills-kids-act"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Lawmakers just advanced online safety laws that require age verification at the app store">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 41">
+      <span class="card-index" aria-hidden="true">41</span>
+
+      <div class="card-meta">
+        <span class="badge">TechCrunch</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 05:44 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://techcrunch.com/2026/03/05/diligencesquared-uses-ai-voice-agents-to-make-ma-research-affordable/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="DiligenceSquared uses AI, voice agents to make M&amp;A research affordable (opens in new tab)">
+          DiligenceSquared uses AI, voice agents to make M&amp;A research affordable
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        Instead of relying on expensive management consultants, the startup uses AI voice agents to conduct interviews with customers of the companies the PE firms are considering buying.
+      </p>
+
+      <a class="card-link"
+         href="https://techcrunch.com/2026/03/05/diligencesquared-uses-ai-voice-agents-to-make-ma-research-affordable/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: DiligenceSquared uses AI, voice agents to make M&amp;A research affordable">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 42">
+      <span class="card-index" aria-hidden="true">42</span>
+
+      <div class="card-meta">
+        <span class="badge">The Verge</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 05:32 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.theverge.com/ai-artificial-intelligence/890347/pentagon-anthropic-supply-chain-risk"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="The Pentagon formally labels Anthropic a supply-chain risk (opens in new tab)">
+          The Pentagon formally labels Anthropic a supply-chain risk
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        After weeks of failed negotiations, public ultimatums, and lawsuit threats, the Defense Department has formally labeled Anthropic a &#34;supply-chain risk,&#34; escalating its fight with the AI company over their acceptable use policies and potentially bringing their fight to court. The decision, first…
+      </p>
+
+      <a class="card-link"
+         href="https://www.theverge.com/ai-artificial-intelligence/890347/pentagon-anthropic-supply-chain-risk"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: The Pentagon formally labels Anthropic a supply-chain risk">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 43">
+      <span class="card-index" aria-hidden="true">43</span>
+
+      <div class="card-meta">
+        <span class="badge">Hacker News</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 05:25 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.anthropic.com/research/labor-market-impacts"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Labor market impacts of AI: A new measure and early evidence (opens in new tab)">
+          Labor market impacts of AI: A new measure and early evidence
+        </a>
+      </div>
+
+      <p class="card-excerpt no-summary">
+        No summary available — click the link to read the full article.
+      </p>
+
+      <a class="card-link"
+         href="https://www.anthropic.com/research/labor-market-impacts"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Labor market impacts of AI: A new measure and early evidence">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 44">
+      <span class="card-index" aria-hidden="true">44</span>
+
+      <div class="card-meta">
+        <span class="badge">TechCrunch</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 05:08 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://techcrunch.com/2026/03/05/cluely-ceo-roy-lee-admits-to-publicly-lying-about-revenue-numbers-last-year/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Cluely CEO Roy Lee admits to publicly lying about revenue numbers last year (opens in new tab)">
+          Cluely CEO Roy Lee admits to publicly lying about revenue numbers last year
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        The $7 million in annual recurring revenue that Cluely CEO Roy Lee shared last summer was a lie, its founder and CEO Roy Lee admitted on Thursday on X.
+      </p>
+
+      <a class="card-link"
+         href="https://techcrunch.com/2026/03/05/cluely-ceo-roy-lee-admits-to-publicly-lying-about-revenue-numbers-last-year/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Cluely CEO Roy Lee admits to publicly lying about revenue numbers last year">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 45">
+      <span class="card-index" aria-hidden="true">45</span>
+
+      <div class="card-meta">
+        <span class="badge">r/technology</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 05:03 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/technology/comments/1rlw12a/fcc_approves_cox_charter_merger_on_condition_they/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="FCC Approves Cox, Charter Merger On Condition They Promise To Be More Racist (opens in new tab)">
+          FCC Approves Cox, Charter Merger On Condition They Promise To Be More Racist
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/StraightedgexLiberal [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/technology/comments/1rlw12a/fcc_approves_cox_charter_merger_on_condition_they/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: FCC Approves Cox, Charter Merger On Condition They Promise To Be More Racist">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 46">
+      <span class="card-index" aria-hidden="true">46</span>
+
+      <div class="card-meta">
+        <span class="badge">r/technology</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 04:42 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/technology/comments/1rlvhrg/tinder_agrees_to_pay_605m_after_dating_app_sued/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Tinder agrees to pay $60.5M after dating app sued for charging certain users more (opens in new tab)">
+          Tinder agrees to pay $60.5M after dating app sued for charging certain users more
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/IndicaOatmeal [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/technology/comments/1rlvhrg/tinder_agrees_to_pay_605m_after_dating_app_sued/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Tinder agrees to pay $60.5M after dating app sued for charging certain users more">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 47">
+      <span class="card-index" aria-hidden="true">47</span>
+
+      <div class="card-meta">
+        <span class="badge">r/programming</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 04:36 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/programming/comments/1rlvble/using_vision_language_models_to_index_and_search/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Using Vision Language Models to Index and Search Fonts (opens in new tab)">
+          Using Vision Language Models to Index and Search Fonts
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/fagnerbrack [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/programming/comments/1rlvble/using_vision_language_models_to_index_and_search/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Using Vision Language Models to Index and Search Fonts">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 48">
+      <span class="card-index" aria-hidden="true">48</span>
+
+      <div class="card-meta">
+        <span class="badge">Hacker News</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 04:34 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://406.fail/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="A standard protocol to handle and discard low-effort, AI-Generated pull requests (opens in new tab)">
+          A standard protocol to handle and discard low-effort, AI-Generated pull requests
+        </a>
+      </div>
+
+      <p class="card-excerpt no-summary">
+        No summary available — click the link to read the full article.
+      </p>
+
+      <a class="card-link"
+         href="https://406.fail/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: A standard protocol to handle and discard low-effort, AI-Generated pull requests">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 49">
+      <span class="card-index" aria-hidden="true">49</span>
+
+      <div class="card-meta">
+        <span class="badge">r/programming</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 04:30 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/programming/comments/1rlv66x/async_programming_is_just_inject_time/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Async Programming Is Just @Inject Time (opens in new tab)">
+          Async Programming Is Just @Inject Time
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/ketralnis [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/programming/comments/1rlv66x/async_programming_is_just_inject_time/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Async Programming Is Just @Inject Time">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 50">
+      <span class="card-index" aria-hidden="true">50</span>
+
+      <div class="card-meta">
+        <span class="badge">TechCrunch</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 04:24 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://techcrunch.com/2026/03/05/aws-amazon-connect-health-ai-agent-platform-health-care-providers/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="AWS launches a new AI agent platform specifically for healthcare (opens in new tab)">
+          AWS launches a new AI agent platform specifically for healthcare
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        AWS is launching Amazon Connect Health, an AI agent platform that will help with patient scheduling, documentation, and patient verification.
+      </p>
+
+      <a class="card-link"
+         href="https://techcrunch.com/2026/03/05/aws-amazon-connect-health-ai-agent-platform-health-care-providers/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: AWS launches a new AI agent platform specifically for healthcare">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 51">
+      <span class="card-index" aria-hidden="true">51</span>
+
+      <div class="card-meta">
+        <span class="badge">The Verge</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 04:12 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.theverge.com/streaming/890312/roku-roklue-trivia-game"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Roku&amp;#8217;s solution to streaming decision fatigue is a trivia game (opens in new tab)">
+          Roku&amp;#8217;s solution to streaming decision fatigue is a trivia game
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        Roku users who struggle to figure out what they want to watch might have an answer in the form of &#34;Roklue,&#34; a new game coming to the streaming platform on March 7th. Announced on Thursday, Roklue is a pop culture trivia game that Roku says helps users discover new content and &#34;tests players on the…
+      </p>
+
+      <a class="card-link"
+         href="https://www.theverge.com/streaming/890312/roku-roklue-trivia-game"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Roku&amp;#8217;s solution to streaming decision fatigue is a trivia game">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 52">
+      <span class="card-index" aria-hidden="true">52</span>
+
+      <div class="card-meta">
+        <span class="badge">Ars Technica</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 04:09 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://arstechnica.com/gaming/2026/03/ms-exec-microsofts-next-console-will-play-xbox-and-pc-games/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="MS exec: Microsoft&#39;s next console will play &#34;Xbox and PC games&#34; (opens in new tab)">
+          MS exec: Microsoft&#39;s next console will play &#34;Xbox and PC games&#34;
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        Project Helix is set to open the closed-console ecosystem, but the details will matter.
+      </p>
+
+      <a class="card-link"
+         href="https://arstechnica.com/gaming/2026/03/ms-exec-microsofts-next-console-will-play-xbox-and-pc-games/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: MS exec: Microsoft&#39;s next console will play &#34;Xbox and PC games&#34;">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 53">
+      <span class="card-index" aria-hidden="true">53</span>
+
+      <div class="card-meta">
+        <span class="badge">TechCrunch</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 04:03 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://techcrunch.com/2026/03/05/fbi-investigating-hack-on-its-wiretap-and-surveillance-systems-report/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="FBI investigating hack on its wiretap and surveillance systems: Report (opens in new tab)">
+          FBI investigating hack on its wiretap and surveillance systems: Report
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        Hackers allegedly broke into the FBI’s networks, according to a report by CNN.
+      </p>
+
+      <a class="card-link"
+         href="https://techcrunch.com/2026/03/05/fbi-investigating-hack-on-its-wiretap-and-surveillance-systems-report/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: FBI investigating hack on its wiretap and surveillance systems: Report">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 54">
+      <span class="card-index" aria-hidden="true">54</span>
+
+      <div class="card-meta">
+        <span class="badge">Ars Technica</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 03:59 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://arstechnica.com/health/2026/03/rfk-jr-can-promote-getting-measles-with-impunity-doj-lawyer-tells-judge/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="RFK Jr.’s anti-vaccine policies are &#34;unreviewable,&#34; DOJ lawyer tells judge (opens in new tab)">
+          RFK Jr.’s anti-vaccine policies are &#34;unreviewable,&#34; DOJ lawyer tells judge
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        The startling claim came amid a lawsuit from the American Academy of Pediatrics.
+      </p>
+
+      <a class="card-link"
+         href="https://arstechnica.com/health/2026/03/rfk-jr-can-promote-getting-measles-with-impunity-doj-lawyer-tells-judge/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: RFK Jr.’s anti-vaccine policies are &#34;unreviewable,&#34; DOJ lawyer tells judge">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 55">
+      <span class="card-index" aria-hidden="true">55</span>
+
+      <div class="card-meta">
+        <span class="badge">TechCrunch</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 03:54 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://techcrunch.com/2026/03/05/us-reportedly-considering-sweeping-new-chip-export-controls/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="US reportedly considering sweeping new chip export controls (opens in new tab)">
+          US reportedly considering sweeping new chip export controls
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        In an alleged drafted proposal, the U.S. government would play a role in every chip export sale regardless of which country it&#39;s coming from.
+      </p>
+
+      <a class="card-link"
+         href="https://techcrunch.com/2026/03/05/us-reportedly-considering-sweeping-new-chip-export-controls/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: US reportedly considering sweeping new chip export controls">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 56">
+      <span class="card-index" aria-hidden="true">56</span>
+
+      <div class="card-meta">
+        <span class="badge">r/programming</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 03:44 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.reddit.com/r/programming/comments/1rltxbg/announcing_rust_1940/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Announcing Rust 1.94.0 (opens in new tab)">
+          Announcing Rust 1.94.0
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+          submitted by   /u/ketralnis [link]   [comments]
+      </p>
+
+      <a class="card-link"
+         href="https://www.reddit.com/r/programming/comments/1rltxbg/announcing_rust_1940/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Announcing Rust 1.94.0">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 57">
+      <span class="card-index" aria-hidden="true">57</span>
+
+      <div class="card-meta">
+        <span class="badge">Ars Technica</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 03:36 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://arstechnica.com/gadgets/2026/03/amazon-appears-to-be-down-with-over-20000-reported-problems/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Amazon appears to be down, with over 20,000 reported problems (opens in new tab)">
+          Amazon appears to be down, with over 20,000 reported problems
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        Problems viewing products and checking out.
+      </p>
+
+      <a class="card-link"
+         href="https://arstechnica.com/gadgets/2026/03/amazon-appears-to-be-down-with-over-20000-reported-problems/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Amazon appears to be down, with over 20,000 reported problems">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 58">
+      <span class="card-index" aria-hidden="true">58</span>
+
+      <div class="card-meta">
+        <span class="badge">The Verge</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 03:30 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://www.theverge.com/games/890131/pokopia-pokemon-high-tech-future-3d-printer"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Pokopia made me look at Pokémon’s high-tech future in a whole new way (opens in new tab)">
+          Pokopia made me look at Pokémon’s high-tech future in a whole new way
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        Pokémon Pokopia features, of all things, a 3D printer. I wasn&#39;t sure why this surprised me so much, given all the other high-tech gear in pretty much every Pokémon game. But I was not expecting to find, inside the once-crumbling Pokémon Center I&#39;d just worked hard to restore, a kind of machine I&#39;d…
+      </p>
+
+      <a class="card-link"
+         href="https://www.theverge.com/games/890131/pokopia-pokemon-high-tech-future-3d-printer"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Pokopia made me look at Pokémon’s high-tech future in a whole new way">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 59">
+      <span class="card-index" aria-hidden="true">59</span>
+
+      <div class="card-meta">
+        <span class="badge">Ars Technica</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 03:25 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://arstechnica.com/ai/2026/03/openai-introduces-gpt-5-4-with-more-knowledge-work-capability/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="OpenAI introduces GPT-5.4 with more knowledge-work capability (opens in new tab)">
+          OpenAI introduces GPT-5.4 with more knowledge-work capability
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        Updates come amid user blowback over the company&#39;s Pentagon deal.
+      </p>
+
+      <a class="card-link"
+         href="https://arstechnica.com/ai/2026/03/openai-introduces-gpt-5-4-with-more-knowledge-work-capability/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: OpenAI introduces GPT-5.4 with more knowledge-work capability">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+
+    <article class="card" aria-label="Article 60">
+      <span class="card-index" aria-hidden="true">60</span>
+
+      <div class="card-meta">
+        <span class="badge">TechCrunch</span>
+        <time class="card-date" datetime="2026-03-05">
+          March 06, 2026 · 03:15 MMT
+        </time>
+      </div>
+
+      <div class="card-title">
+        <a href="https://techcrunch.com/2026/03/05/amazon-is-rolling-out-a-redesigned-fire-tv-app/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Amazon is rolling out a redesigned Fire TV app (opens in new tab)">
+          Amazon is rolling out a redesigned Fire TV app
+        </a>
+      </div>
+
+      <p class="card-excerpt">
+        With the updated Fire TV app, users can browse and discover content directly from their phone, manage their watchlist on the go, and play titles on their TV from the mobile app.
+      </p>
+
+      <a class="card-link"
+         href="https://techcrunch.com/2026/03/05/amazon-is-rolling-out-a-redesigned-fire-tv-app/"
+         target="_blank"
+         rel="noopener noreferrer"
+         aria-label="Read full article: Amazon is rolling out a redesigned Fire TV app">
+        Read full article <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </article>
+
+  </div>
+
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">IT <span class="accent">Pulse</span></div>
+    <div class="footer-note">
+      Generated by shweba2 · Public RSS feeds only · No tracking · No cookies
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ── Scroll progress bar ──────────────────────────────────────────
+  // Updates the thin teal bar at the top of the page as the user scrolls.
+  (function () {
+    const bar = document.getElementById('progress');
+    if (!bar) return;
+
+    function updateProgress() {
+      const scrolled  = window.scrollY;
+      const maxScroll = document.body.scrollHeight - window.innerHeight;
+      const pct       = maxScroll > 0 ? (scrolled / maxScroll) * 100 : 0;
+      bar.style.width = Math.min(Math.max(pct, 0), 100) + '%';
+    }
+
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress(); // initialise on load
+  }());
+</script>
+
+</body>
+</html>

@@ -1,0 +1,103 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# .github/workflows/update-news.yml
+#
+# Runs the IT Pulse news generator once per day and commits the refreshed
+# index.html back to the repository so GitHub Pages serves the latest content.
+#
+# Schedule
+# ────────
+#   Cron:  0 18 * * *   (18:00 UTC every day)
+#   Local: 00:30 MMT the following calendar day  (Yangon, UTC+6:30)
+#
+# Cost
+# ────
+#   • GitHub Actions is FREE for public repositories.
+#   • This workflow runs once per day ≈ 30 runs/month.
+#   • GitHub's free tier allows 2,000 minutes/month for public repos.
+#   • Each run takes < 2 minutes → well within the free quota.
+#   • GitHub Pages hosting is also FREE.
+#   • All RSS feeds used are publicly accessible with no API keys.
+#   → Total cost: $0.00
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Update Daily IT News
+
+# ── Triggers ──────────────────────────────────────────────────────────────────
+on:
+  # ┌─ minute (0)
+  # │ ┌─ hour (18 UTC = 00:30 Yangon time next day)
+  # │ │  ┌─ day of month (every day)
+  # │ │  │ ┌─ month (every month)
+  # │ │  │ │ ┌─ day of week (every day)
+  schedule:
+    - cron: "0 18 * * *"
+
+  # Allow a manual run from the Actions tab (useful for testing / first deploy)
+  workflow_dispatch:
+
+# ── Permissions ───────────────────────────────────────────────────────────────
+# "contents: write" is required so the workflow can commit index.html back.
+# All other permissions are left at their default (read-only) for security.
+permissions:
+  contents: write
+
+# ── Jobs ──────────────────────────────────────────────────────────────────────
+jobs:
+  update-news:
+    name: Fetch news & rebuild index.html
+    runs-on: ubuntu-latest
+    timeout-minutes: 10   # kill the job if it hangs (saves free-tier minutes)
+
+    steps:
+      # ── 1. Check out the repository ────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        # fetch-depth: 1 (default) is fine — we only need the latest commit.
+
+      # ── 2. Set up Python ───────────────────────────────────────────────────
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # ── 3. Cache pip packages (speeds up subsequent runs) ──────────────────
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          # Cache key changes only when requirements.txt changes
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # ── 4. Install Python dependencies ─────────────────────────────────────
+      - name: Install dependencies
+        run: pip install --quiet -r requirements.txt
+
+      # ── 5. Run the news fetcher ─────────────────────────────────────────────
+      # The script writes index.html to the repo root.
+      # If ALL feeds fail, the script exits with code 1 and the job fails
+      # (index.html is NOT overwritten, so the previous version stays live).
+      - name: Fetch and render news
+        run: python fetch_news.py
+
+      # ── 6. Commit and push the updated index.html ──────────────────────────
+      # We use the github-actions bot identity so the commit is clearly
+      # machine-generated and does NOT trigger another workflow run
+      # (GitHub skips workflow triggers for commits made by github-actions[bot]).
+      - name: Commit updated index.html
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add index.html
+
+          # Only commit if index.html actually changed (avoids empty commits)
+          if git diff --cached --quiet; then
+            echo "ℹ️  index.html is unchanged — nothing to commit."
+          else
+            TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
+            git commit -m "chore: update news [${TIMESTAMP}] [skip ci]"
+            git push
+            echo "✅ index.html updated and pushed."
+          fi
