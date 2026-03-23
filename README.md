@@ -23,3 +23,7 @@ python fetch_news.py
 - No API keys are required.
 - The site is generated from public RSS feeds.
 - Deployment artifact contains only public web files.
+Click the link to read IT news: https://ancp02.github.io/IT-Pulse/
+
+News is updated daily. 
+I warmly welcome your comments and suggestions for improvements.
