@@ -77,11 +77,14 @@ def _safe_get(url: str) -> Optional[str]:
     Returns None on any network or HTTP error (logs a warning instead of
     raising), so a single broken feed never aborts the whole run.
     """
+    repo_slug = os.getenv("GITHUB_REPOSITORY", "ancp02/IT-Pulse")
+    repo_url = f"https://github.com/{repo_slug}"
+
     headers = {
         # Identify ourselves politely; some feeds block generic Python UA strings.
         "User-Agent": (
             "Mozilla/5.0 (compatible; ITPulseBot/2.0; "
-            "+https://github.com/your-username/it-pulse)"
+            f"+{repo_url})"
         ),
         "Accept": "application/rss+xml, application/atom+xml, text/xml, */*",
     }
