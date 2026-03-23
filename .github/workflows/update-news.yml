@@ -1,300 +1,73 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# .github/workflows/update-news.yml
-#
-# 🔒 SECURE: Runs the IT Pulse news generator once per day and commits the refreshed
-# index.html back to the repository so GitHub Pages serves the latest content.
-#
-# Schedule
-# ────────
-#   Cron:  0 18 * * *   (18:00 UTC every day)
-#   Local: 00:30 MMT the following calendar day  (Yangon, UTC+6:30)
-#
-# Security Features
-# ─────────────────
-#   • Minimal permissions (contents: write only)
-#   • Input validation and sanitization
-#   • Timeout protection (10 minutes max)
-#   • No external API keys required
-#   • Public RSS feeds only
-#
-# Cost
-# ────
-#   • GitHub Actions is FREE for public repositories.
-#   • This workflow runs once per day ≈ 30 runs/month.
-#   • GitHub's free tier allows 2,000 minutes/month for public repos.
-#   • Each run takes < 2 minutes → well within the free quota.
-#   • GitHub Pages hosting is also FREE.
-#   • All RSS feeds used are publicly accessible with no API keys.
-#   → Total cost: $0.00
-# ─────────────────────────────────────────────────────────────────────────────
-
 name: Update Daily IT News
 
-# ── Triggers ──────────────────────────────────────────────────────────────────
 on:
-  # ┌─ minute (0)
-  # │ ┌─ hour (18 UTC = 00:30 Yangon time next day)
-  # │ │  ┌─ day of month (every day)
-  # │ │  │ ┌─ month (every month)
-  # │ │  │ │ ┌─ day of week (every day)
   schedule:
-    - cron: "0 18 * * *"
-
-  # Allow a manual run from the Actions tab (useful for testing / first deploy)
+    # 18:30 UTC = 01:00 MMT next day
+    - cron: "30 18 * * *"
   workflow_dispatch:
 
-# ── Permissions ───────────────────────────────────────────────────────────────
-# 🔒 Security: "contents: write" is required so the workflow can commit index.html back.
-# All other permissions are left at their default (read-only) for security.
 permissions:
   contents: write
-  # Explicitly deny other permissions
-  pages: none
-  id-token: none
-  actions: read  # needed to read workflow status
 
-# ── Jobs ──────────────────────────────────────────────────────────────────────
+concurrency:
+  group: update-news
+  cancel-in-progress: false
+
 jobs:
   update-news:
-    name: Fetch news & rebuild index.html
+    name: Fetch feeds and refresh index
     runs-on: ubuntu-latest
-    timeout-minutes: 10   # 🔒 Security: kill the job if it hangs (saves free-tier minutes)
+    timeout-minutes: 10
 
     steps:
-    # 🔒 Security: Checkout with minimal permissions
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        # Only fetch main branch for security
-        fetch-depth: 1
-        token: ${{ secrets.GITHUB_TOKEN }}
-
-    # 🔒 Security: Verify environment before proceeding
-    - name: Pre-flight security checks
-      run: |
-        echo "🔍 Running pre-flight security checks..."
-
-        # Verify we're in the correct repository
-        if [ "$GITHUB_REPOSITORY" != "shweba2/IT-Pulse" ]; then
-          echo "❌ Workflow running in wrong repository: $GITHUB_REPOSITORY"
-          exit 1
-        fi
-
-        # Verify required files exist
-        REQUIRED_FILES=("fetch_news.py" "template.html" "requirements.txt")
-        for file in "${REQUIRED_FILES[@]}"; do
-          if [ ! -f "$file" ]; then
-            echo "❌ Required file missing: $file"
-            exit 1
-          fi
-        done
-
-        # Check that we have write access to the repo
-        if ! git config --global user.name "github-actions[bot]"; then
-          echo "❌ Cannot configure git user"
-          exit 1
-        fi
-
-        if ! git config --global user.email "github-actions[bot]@users.noreply.github.com"; then
-          echo "❌ Cannot configure git email"
-          exit 1
-        fi
-
-        echo "✅ Pre-flight checks passed"
-
-    # 🔒 Security: Set up Python with verification
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-        check-latest: true
-
-    # Install dependencies
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-
-    # 🔒 Security: Validate script before execution
-    - name: Validate news script
-      run: |
-        echo "🔍 Validating fetch_news.py before execution..."
-
-        # Syntax check
-        if ! python -m py_compile fetch_news.py; then
-          echo "❌ fetch_news.py has syntax errors"
-          exit 1
-        fi
-
-        # Check file size is reasonable (not suspiciously small/large)
-        SCRIPT_SIZE=$(stat -c%s "fetch_news.py" 2>/dev/null || stat -f%z "fetch_news.py" 2>/dev/null)
-        if [ "$SCRIPT_SIZE" -lt 1000 ] || [ "$SCRIPT_SIZE" -gt 50000 ]; then
-          echo "❌ fetch_news.py size suspicious ($SCRIPT_SIZE bytes)"
-          exit 1
-        fi
-
-        echo "✅ Script validation passed"
-
-    # Execute the news fetching
-    - name: Fetch latest IT news
-      run: |
-        echo "📰 Fetching latest IT news..."
-        START_TIME=$(date +%s)
-
-        # Run with timeout protection
-        timeout 300 python fetch_news.py
-
-        END_TIME=$(date +%s)
-        DURATION=$((END_TIME - START_TIME))
-
-        # Verify output was generated
-        if [ ! -f "index.html" ]; then
-          echo "❌ index.html was not generated"
-          exit 1
-        fi
-
-        # Check output size is reasonable
-        OUTPUT_SIZE=$(stat -c%s "index.html" 2>/dev/null || stat -f%z "index.html" 2>/dev/null)
-        if [ "$OUTPUT_SIZE" -lt 1000 ]; then
-          echo "❌ Generated index.html too small ($OUTPUT_SIZE bytes)"
-          exit 1
-        fi
-
-        echo "✅ News fetched successfully in ${DURATION}s ($OUTPUT_SIZE bytes)"
-
-    # 🔒 Security: Verify the generated HTML is safe
-    - name: Validate generated HTML
-      run: |
-        echo "🔍 Validating generated HTML..."
-
-        # Check for basic HTML structure
-        if ! grep -q "<!DOCTYPE html>" index.html; then
-          echo "❌ Generated HTML missing DOCTYPE"
-          exit 1
-        fi
-
-        if ! grep -q "<html" index.html; then
-          echo "❌ Generated HTML missing <html> tag"
-          exit 1
-        fi
-
-        # Check for potentially dangerous content (basic XSS prevention)
-        if grep -q "<script" index.html && ! grep -q "src=" index.html; then
-          echo "⚠️  Inline scripts detected - review for security"
-        fi
-
-        echo "✅ HTML validation passed"
-
-    # 🔒 Security: Commit only the expected changes
-    - name: Commit updated index.html
-      run: |
-        echo "💾 Committing changes..."
-
-        # Check what files changed
-        CHANGED_FILES=$(git diff --name-only)
-
-        # Only allow index.html to be modified
-        if [ "$CHANGED_FILES" != "index.html" ]; then
-          echo "❌ Unexpected files changed: $CHANGED_FILES"
-          echo "Only index.html should be modified by this workflow"
-          exit 1
-        fi
-
-        # Check if there are actually changes to commit
-        if git diff --quiet; then
-          echo "ℹ️  No changes to commit (news may be the same)"
-          exit 0
-        fi
-
-        # Add and commit
-        git add index.html
-        git commit -m "🤖 Auto-update: Daily IT news refresh
-
-Generated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
-Source: GitHub Actions workflow
-Repository: $GITHUB_REPOSITORY
-Workflow: $GITHUB_WORKFLOW"
-
-        echo "✅ Changes committed successfully"
-
-    # 🔒 Security: Push with verification
-    - name: Push changes
-      run: |
-        echo "📤 Pushing changes to main branch..."
-
-        # Verify we're on the correct branch
-        CURRENT_BRANCH=$(git branch --show-current)
-        if [ "$CURRENT_BRANCH" != "main" ]; then
-          echo "❌ Not on main branch: $CURRENT_BRANCH"
-          exit 1
-        fi
-
-        # Push the changes
-        if ! git push origin main; then
-          echo "❌ Failed to push changes"
-          exit 1
-        fi
-
-        echo "✅ Changes pushed successfully"
-
-    # Success notification
-    - name: Success notification
-      if: success()
-      run: |
-        echo "🎉 Daily news update completed successfully!"
-        echo "📊 Next update: $(date -d '+1 day' '+%Y-%m-%d 18:00 UTC')"
-        echo "🌐 Website: https://shweba2.github.io/IT-Pulse"
-
-    steps:
-      # ── 1. Check out the repository ────────────────────────────────────────
       - name: Checkout repository
         uses: actions/checkout@v4
-        # fetch-depth: 1 (default) is fine — we only need the latest commit.
+        with:
+          fetch-depth: 1
 
-      # ── 2. Set up Python ───────────────────────────────────────────────────
-      - name: Set up Python 3.11
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
 
-      # ── 3. Cache pip packages (speeds up subsequent runs) ──────────────────
-      - name: Cache pip packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          # Cache key changes only when requirements.txt changes
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      # ── 4. Install Python dependencies ─────────────────────────────────────
       - name: Install dependencies
-        run: pip install --quiet -r requirements.txt
-
-      # ── 5. Run the news fetcher ─────────────────────────────────────────────
-      # The script writes index.html to the repo root.
-      # If ALL feeds fail, the script exits with code 1 and the job fails
-      # (index.html is NOT overwritten, so the previous version stays live).
-      - name: Fetch and render news
-        run: python fetch_news.py
-
-      # ── 6. Commit and push the updated index.html ──────────────────────────
-      # We use the github-actions bot identity so the commit is clearly
-      # machine-generated and does NOT trigger another workflow run
-      # (GitHub skips workflow triggers for commits made by github-actions[bot]).
-      - name: Commit updated index.html
         run: |
-          git config user.name  "github-actions[bot]"
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Validate and generate index
+        run: |
+          python -m py_compile fetch_news.py
+          python fetch_news.py
+
+          test -f index.html
+          grep -q "<!DOCTYPE html>" index.html
+
+      - name: Commit and push if changed
+        run: |
+          changed_files=$(git status --porcelain | awk '{print $2}')
+
+          if [ -z "$changed_files" ]; then
+            echo "No repository changes detected."
+            exit 0
+          fi
+
+          unexpected=$(printf "%s\n" "$changed_files" | grep -v '^index.html$' || true)
+          if [ -n "$unexpected" ]; then
+            echo "Unexpected file changes detected:"
+            printf "%s\n" "$unexpected"
+            exit 1
+          fi
+
+          git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git add index.html
-
-          # Only commit if index.html actually changed (avoids empty commits)
           if git diff --cached --quiet; then
-            echo "ℹ️  index.html is unchanged — nothing to commit."
-          else
-            TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
-            git commit -m "chore: update news [${TIMESTAMP}] [skip ci]"
-            git push
-            echo "✅ index.html updated and pushed."
+            echo "index.html did not change."
+            exit 0
           fi
+
+          git commit -m "chore: auto-refresh IT Pulse feed"
+          git push

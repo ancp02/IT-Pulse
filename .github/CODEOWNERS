@@ -1,0 +1,9 @@
+# Protect critical files with code owner review (requires branch protection).
+* @ancp02
+
+# Critical automation and content pipeline files
+/.github/workflows/* @ancp02
+/fetch_news.py @ancp02
+/template.html @ancp02
+/index.html @ancp02
+/requirements.txt @ancp02
