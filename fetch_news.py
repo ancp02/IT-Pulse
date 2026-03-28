@@ -22,6 +22,7 @@ import logging
 import os
 import re
 import sys
+import time
 import calendar
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -62,6 +63,12 @@ MAX_ARTICLES = 60
 # HTTP request timeout in seconds per feed
 REQUEST_TIMEOUT = 15
 
+# Retry attempts per feed request (total attempts = retries + 1)
+REQUEST_RETRIES = 2
+
+# Base sleep in seconds between retry attempts
+RETRY_BACKOFF_SECONDS = 1.5
+
 # Minimum excerpt length before we fall back to a default message
 MIN_EXCERPT_LEN = 10
 
@@ -88,18 +95,32 @@ def _safe_get(url: str) -> Optional[str]:
         ),
         "Accept": "application/rss+xml, application/atom+xml, text/xml, */*",
     }
-    try:
-        resp = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
-        resp.raise_for_status()
-        return resp.text
-    except requests.exceptions.Timeout:
-        log.warning("Timeout fetching %s (limit=%ds)", url, REQUEST_TIMEOUT)
-    except requests.exceptions.ConnectionError as exc:
-        log.warning("Connection error fetching %s — %s", url, exc)
-    except requests.exceptions.HTTPError as exc:
-        log.warning("HTTP %s for %s", exc.response.status_code, url)
-    except requests.exceptions.RequestException as exc:
-        log.warning("Request failed for %s — %s", url, exc)
+    for attempt in range(REQUEST_RETRIES + 1):
+        try:
+            resp = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
+            resp.raise_for_status()
+            return resp.text
+        except requests.exceptions.Timeout:
+            log.warning("Timeout fetching %s (limit=%ds)", url, REQUEST_TIMEOUT)
+        except requests.exceptions.ConnectionError as exc:
+            log.warning("Connection error fetching %s — %s", url, exc)
+        except requests.exceptions.HTTPError as exc:
+            status = exc.response.status_code if exc.response is not None else "?"
+            log.warning("HTTP %s for %s", status, url)
+        except requests.exceptions.RequestException as exc:
+            log.warning("Request failed for %s — %s", url, exc)
+
+        if attempt < REQUEST_RETRIES:
+            sleep_seconds = RETRY_BACKOFF_SECONDS * (attempt + 1)
+            log.info(
+                "Retrying %s in %.1fs (attempt %d/%d)",
+                url,
+                sleep_seconds,
+                attempt + 2,
+                REQUEST_RETRIES + 1,
+            )
+            time.sleep(sleep_seconds)
+
     return None
 
 
@@ -309,6 +330,9 @@ def render_html(articles: list[dict], output_path: Path) -> None:
 
 def main() -> None:
     output = Path(__file__).parent / "index.html"
+    fail_on_empty = os.getenv("ITPULSE_FAIL_ON_EMPTY", "true").lower() in {
+        "1", "true", "yes", "on"
+    }
 
     log.info(
         "=== IT Pulse News Generator — %s ===",
@@ -319,11 +343,16 @@ def main() -> None:
 
     if not articles:
         # Safety guard: never overwrite a working page with an empty one.
-        log.error(
+        msg = (
             "No articles were fetched from any source. "
             "index.html has NOT been overwritten."
         )
-        sys.exit(1)
+        if fail_on_empty:
+            log.error(msg)
+            sys.exit(1)
+
+        log.warning("%s Continuing without failure because ITPULSE_FAIL_ON_EMPTY=false.", msg)
+        return
 
     render_html(articles, output)
     log.info("Done. Open %s in your browser to preview.", output)
